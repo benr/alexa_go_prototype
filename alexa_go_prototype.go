@@ -3,32 +3,59 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/davecgh/go-spew/spew"
 )
 
-// This "void" type acts as a holder to unmarshal the input JSON into
-type Event interface{}
+type AlexaRequest struct {
+	Version string `json:"version"`
+	Request struct {
+		Type   string `json:"type"`
+		Time   string `json:"timestamp"`
+		Intent struct {
+			Name               string `json:"name"`
+			ConfirmationStatus string `json:"confirmationstatus"`
+		} `json:"intent"`
+	} `json:"request"`
+}
 
-func HandleRequest(ctx context.Context, e Event) (string, error) {
-	// Output the raw unindexed map[interface{}]interface{}:
-	//log.Printf("Raw event: %v+\n", e)
+type AlexaResponse struct {
+	Version  string `json:"version"`
+	Response struct {
+		OutputSpeech struct {
+			Type string `json:"type"`
+			Text string `json:"text"`
+		} `json:"outputSpeech"`
+	} `json:"response"`
+}
 
-	// Use Type Assertion to return an indexed map:
-	myEvent := e.(map[string]interface{})
-	myRequest := myEvent["request"].(map[string]interface{})
+func CreateResponse() *AlexaResponse {
+	var resp AlexaResponse
+	resp.Version = "1.0"
+	resp.Response.OutputSpeech.Type = "PlainText"
+	resp.Response.OutputSpeech.Text = "Hello.  Please override this default output."
+	return &resp
+}
 
-	// Iterate over Map Keys to examine input event:
-	fmt.Println("---- Dumping Requests Map: ----")
-	for k, v := range myRequest {
-		fmt.Printf("Key %v = %v\n", k, v)
-	}
+func (resp *AlexaResponse) Say(text string) {
+	resp.Response.OutputSpeech.Text = text
+}
+
+func HandleRequest(ctx context.Context, i AlexaRequest) (AlexaResponse, error) {
+	// Use Spew to output the request for debugging purposes:
+	fmt.Println("---- Dumping Input Map: ----")
+	spew.Dump(i)
 	fmt.Println("---- Done. ----")
 
 	// Example of accessing map value via index:
-	fmt.Println("Request type is ", myRequest["type"])
+	log.Printf("Request type is ", i.Request.Intent.Name)
 
-	return fmt.Sprintf("Done!"), nil
+	resp := CreateResponse()
+	resp.Say("Howde, I am ready to rock.")
+
+	return *resp, nil
 }
 
 func main() {
