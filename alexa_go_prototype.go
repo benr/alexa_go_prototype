@@ -52,8 +52,20 @@ func HandleRequest(ctx context.Context, i AlexaRequest) (AlexaResponse, error) {
 	// Example of accessing map value via index:
 	log.Printf("Request type is ", i.Request.Intent.Name)
 
+	// Create a response object
 	resp := CreateResponse()
-	resp.Say("Howde, I am ready to rock.")
+
+	// Customize the response for each Alexa Intent
+	switch i.Request.Intent.Name {
+	case "officetemp":
+		resp.Say("The current temperature is 68 degrees.")
+	case "hello":
+		resp.Say("Hello there, Lambda appears to be working properly.")
+	case "AMAZON.HelpIntent":
+		resp.Say("This app is easy to use, just say: ask the office how warm it is")
+	default:
+		resp.Say("I'm sorry, the input does not look like something I understand.")
+	}
 
 	return *resp, nil
 }
