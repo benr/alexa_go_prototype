@@ -16,16 +16,17 @@ func HandleRequest(ctx context.Context, e Event) (string, error) {
 
 	// Use Type Assertion to return an indexed map:
 	myEvent := e.(map[string]interface{})
+	myRequest := myEvent["request"].(map[string]interface{})
 
 	// Iterate over Map Keys to examine input event:
-	fmt.Println("---- Dumping Events Map: ----")
-	for k, v := range myEvent {
+	fmt.Println("---- Dumping Requests Map: ----")
+	for k, v := range myRequest {
 		fmt.Printf("Key %v = %v\n", k, v)
 	}
 	fmt.Println("---- Done. ----")
 
 	// Example of accessing map value via index:
-	//fmt.Println("Key1 is ", myEvent["key1"])
+	fmt.Println("Request type is ", myRequest["type"])
 
 	return fmt.Sprintf("Done!"), nil
 }
